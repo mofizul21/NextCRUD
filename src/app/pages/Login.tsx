@@ -1,12 +1,13 @@
-"use client";
+'use client';
+
 import { useState } from 'react';
 
-const Register = () => {
+const Login = () => {
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
     password: '',
   });
+
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -19,11 +20,9 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(''); // Clear any previous errors
-    setSuccessMessage(''); // Clear success message
 
     try {
-      const res = await fetch('/api/user', {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,45 +32,32 @@ const Register = () => {
 
       console.log('Response: ', res);
 
-      const data = await res.json();
-
       if (res.ok) {
-        setSuccessMessage(data.message);
-        setFormData({ username: '', email: '', password: '' }); // Clear the form
+        const data = await res.json();
+        localStorage.setItem('user', JSON.stringify(data.user));
+        window.location.href = '/profile'; // Redirect to profile page
       } else {
-        setErrorMessage(data.error || 'Registration failed. Please try again.');
+        const errorData = await res.json();
+        setErrorMessage(errorData.error || 'Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      console.error('Login error:', error);
       setErrorMessage('Something went wrong. Please try again.');
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
-          Register
+          Login
         </h2>
 
         {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
         {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700">
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"
-              required
-            />
-          </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700">
               Email
@@ -104,7 +90,7 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
           >
-            Register
+            Login
           </button>
         </form>
       </div>
@@ -112,4 +98,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;
